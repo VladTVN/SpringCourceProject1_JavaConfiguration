@@ -14,7 +14,6 @@ import tvn.springCourse.models.Person;
 import tvn.springCourse.secvices.interfaces.BookAdministration;
 import tvn.springCourse.secvices.interfaces.PersonCrudService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -39,29 +38,23 @@ public class BookController {
     public String getById(@PathVariable("id") int id, Model model,
                           @ModelAttribute("book") Book book, BindingResult bindingResult, @ModelAttribute("person") Person person){
 
+
         try {
             book = bookAdministration.getById(id);
             model.addAttribute("book", book);
-        } catch (BookDaoException bookDAOException) {
-            if (bookDAOException.getErrorCode().equals(DaoErrorCode.ENTITY_NOT_FOUND)){
-            bindingResult.rejectValue("id","",  bookDAOException.errorMessage());
-            }
-        }
-
-        try {
             Person owner = bookAdministration.getBookOwner(id);
             model.addAttribute("owner", owner);
         } catch (PersonDaoException personDaoException) {
-            List<Person> people;
-
             if (personDaoException.getErrorCode().equals(DaoErrorCode.ENTITY_NOT_FOUND)) {
-                people = personCrudService.getAll();
-            } else {
-                people = new ArrayList<>();
+                List<Person> people = personCrudService.getAll();
+                model.addAttribute("people", people);
             }
-            model.addAttribute("people", people);
-
+        } catch (BookDaoException bookDAOException) {
+            if (bookDAOException.getErrorCode().equals(DaoErrorCode.ENTITY_NOT_FOUND)) {
+                bindingResult.rejectValue("id", "", bookDAOException.errorMessage());
+            }
         }
+
 
         return "book/book";
     }
@@ -70,14 +63,23 @@ public class BookController {
     public String lendBook(@PathVariable("id") int id, @ModelAttribute("person") Person person,
                              @ModelAttribute("book") Book book){
 
-        bookAdministration.lendBook(id, person.getPersonId());
+        try {
+            bookAdministration.lendBook(id, person.getPersonId());
+        } catch (BookDaoException | PersonDaoException e) {
+            //TODO Сделать обработку ошибки. Возможно, сделать страницу ошибки
+            throw new RuntimeException(e);
+        }
         return "redirect:/books/" + id;
     }
 
     @PatchMapping("/{id}/release")
     public String releaseBook(@PathVariable("id") int id, @ModelAttribute("book") Book book){
 
-        bookAdministration.releaseBook(id);
+        try {
+            bookAdministration.releaseBook(id);
+        } catch (BookDaoException e) {
+            throw new RuntimeException(e);
+        }
         return "redirect:/books/" + id;
     }
 

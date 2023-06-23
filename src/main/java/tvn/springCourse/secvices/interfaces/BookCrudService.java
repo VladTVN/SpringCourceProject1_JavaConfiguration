@@ -18,5 +18,5 @@ public interface BookCrudService {
 
     void delete(int id);
 
-    Person getBookOwner(int id) throws PersonDaoException;
+    Person getBookOwner(int id) throws PersonDaoException, BookDaoException;
 }

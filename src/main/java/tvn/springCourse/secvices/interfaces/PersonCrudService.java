@@ -19,7 +19,7 @@ public interface PersonCrudService {
 
     void delete(int id);
 
-    List<Book> getPersonsBook(int id);
+    List<Book> getPersonsBook(int id) throws PersonDaoException;
     Optional<Person> findByFullName(String fullName);
 
 }

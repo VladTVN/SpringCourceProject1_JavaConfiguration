@@ -47,7 +47,13 @@ public class PeopleController {
             }
         }
 
-        List<Book> personsBooks = personService.getPersonsBook(id);
+        List<Book> personsBooks;
+        try {
+            personsBooks = personService.getPersonsBook(id);
+        } catch (PersonDaoException e) {
+            //TODO Сделать обработку ошибки. Возможно, сделать страницу ошибки
+            throw new RuntimeException(e);
+        }
         model.addAttribute("books", personsBooks);
 
         return "people/person";
