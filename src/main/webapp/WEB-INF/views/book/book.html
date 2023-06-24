@@ -8,7 +8,7 @@
 <body>
 <div style="color:red" th:if="${#fields.hasErrors('id')}" th:errors="*{id}">Id Error</div>
 <div th:if="${not #fields.hasErrors('id')}">
-    <p th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getPublicationDate()}">VALUE</p>
+    <p th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getPublicationYear()}">VALUE</p>
 
     <div th:if="${owner}">
         <span>Книга сейчас у: </span> <span th:text="${owner.getFullName()}">Person Name</span>

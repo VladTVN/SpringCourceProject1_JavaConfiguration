@@ -13,7 +13,9 @@ import tvn.springCourse.models.Person;
 import tvn.springCourse.repositories.PersonRepository;
 import tvn.springCourse.secvices.interfaces.PersonCrudService;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -58,8 +60,21 @@ public class PersonService implements PersonCrudService {
     @Override
     public List<Book> getPersonsBook(int id) throws PersonDaoException {
         Person person = personRepository.findById(id).orElseThrow(() -> new PersonDaoException(DaoErrorCode.ENTITY_NOT_FOUND));
-        Hibernate.initialize(person.getBookList());
-        return person.getBookList();
+        List<Book> personsBookList = person.getBookList();
+        for (Book book : personsBookList) {
+            Date dateOfIssue = book.getDateOfIssue();
+            if (Objects.isNull(dateOfIssue)){
+                continue;
+            }
+            Date currentDate = new Date();
+            long dateDifference = currentDate.getTime() - dateOfIssue.getTime();
+            long differencesInDays = Math.abs(dateDifference / (24 * 60 * 60 * 1000));
+            if (differencesInDays > 10) {
+                book.setReturnPeriodExpired(true);
+            }
+
+        }
+        return personsBookList;
     }
 
 

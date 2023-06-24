@@ -2,6 +2,9 @@ package tvn.springCourse.controllers;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,6 +18,7 @@ import tvn.springCourse.secvices.interfaces.BookAdministration;
 import tvn.springCourse.secvices.interfaces.PersonCrudService;
 
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 @RequestMapping("/books")
@@ -29,8 +33,29 @@ public class BookController {
     }
 
     @GetMapping
-    public String getPeopleList(Model model){
-        model.addAttribute("books", bookAdministration.getAll());
+    public String getBookList(Model model,
+                              @RequestParam(value = "page", required = false) Integer page,
+                              @RequestParam(value = "books_per_page",required = false) Integer bookPerPage,
+                              @RequestParam(value = "sort_by_year", required = false) boolean sortByYear){
+
+        List<Book> bookList;
+        if (Objects.nonNull(page) && Objects.nonNull(bookPerPage)){
+            Pageable pageRequest;
+            if (sortByYear){
+                pageRequest = PageRequest.of(page, bookPerPage, Sort.by("publicationYear"));
+            }else {
+                pageRequest = PageRequest.of(page, bookPerPage);
+            }
+            bookList = bookAdministration.getAll(pageRequest);
+        }else {
+            if(sortByYear){
+                bookList = bookAdministration.getAllSortByYear();
+            }else{
+                bookList = bookAdministration.getAll();
+            }
+        }
+
+        model.addAttribute("books", bookList);
         return "book/books";
     }
 
@@ -124,6 +149,19 @@ public class BookController {
     public String delete(@PathVariable("id") int id){
         bookAdministration.delete(id);
         return "redirect:/books";
+    }
+
+    @GetMapping("/search")
+    public String bookSearch(){
+        return "book/search";
+    }
+
+    @PostMapping("/search")
+    public String makeSearch(@RequestParam("query") String query, Model model){
+        List<Book> bookList = bookAdministration.findByNameStartingWith(query);
+
+        model.addAttribute("books",bookList);
+        return "book/search";
     }
 
 }

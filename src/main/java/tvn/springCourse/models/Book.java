@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
-import org.springframework.stereotype.Component;
+
+import java.util.Date;
 
 @Entity
 @Table(name = "book")
@@ -23,28 +24,53 @@ public class Book {
     private String author;
     @Min(value = 0, message = "Age cant be less then 0")
     @Column(name = "publication_date")
-    private int publicationDate;
+    private int publicationYear;
+
+    @Column(name = "date_of_issue")
+    @Temporal(value = TemporalType.TIMESTAMP)
+    private Date dateOfIssue;
+
+    @Transient
+    private boolean returnPeriodExpired = false;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "person_id", referencedColumnName = "person_id")
     private Person owner;
 
-    public Book(int bookId, String name, String author, int publicationDate) {
+
+    public Book(int bookId, String name, String author, int publicationYear) {
         this.bookId = bookId;
         this.name = name;
         this.author = author;
-        this.publicationDate = publicationDate;
+        this.publicationYear = publicationYear;
     }
 
     public Book() {
     }
 
-    public Book(int bookId, String name, String author, int publicationDate, Person owner) {
-        this.bookId = bookId;
+    public Book(String name, String author, int publicationYear, Date dateOfIssue, boolean returnPeriodExpired, Person owner) {
         this.name = name;
         this.author = author;
-        this.publicationDate = publicationDate;
+        this.publicationYear = publicationYear;
+        this.dateOfIssue = dateOfIssue;
+        this.returnPeriodExpired = returnPeriodExpired;
         this.owner = owner;
+    }
+
+    public boolean isReturnPeriodExpired() {
+        return returnPeriodExpired;
+    }
+
+    public void setReturnPeriodExpired(boolean returnPeriodExpired) {
+        this.returnPeriodExpired = returnPeriodExpired;
+    }
+
+    public Date getDateOfIssue() {
+        return dateOfIssue;
+    }
+
+    public void setDateOfIssue(Date dateOfIssue) {
+        this.dateOfIssue = dateOfIssue;
     }
 
     public Person getOwner() {
@@ -79,11 +105,11 @@ public class Book {
         this.author = author;
     }
 
-    public int getPublicationDate() {
-        return publicationDate;
+    public int getPublicationYear() {
+        return publicationYear;
     }
 
-    public void setPublicationDate(int publicationDate) {
-        this.publicationDate = publicationDate;
+    public void setPublicationYear(int publicationDate) {
+        this.publicationYear = publicationDate;
     }
 }

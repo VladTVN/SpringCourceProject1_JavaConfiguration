@@ -1,6 +1,9 @@
 package tvn.springCourse.secvices.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tvn.springCourse.enums.DaoErrorCode;
@@ -12,6 +15,8 @@ import tvn.springCourse.repositories.BookRepository;
 import tvn.springCourse.repositories.PersonRepository;
 import tvn.springCourse.secvices.interfaces.BookAdministration;
 
+
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,8 +34,23 @@ public class BookService implements BookAdministration {
     }
 
 
+    @Override
+    public List<Book> getAll(Pageable pageable) {
+        return bookRepository.findAll(pageable).getContent();
+    }
+
+    @Override
+    public List<Book> getAllSortByYear() {
+        return bookRepository.findAll(Sort.by("publicationYear"));
+    }
+
     public List<Book> getAll() {
         return bookRepository.findAll();
+    }
+
+    @Override
+    public List<Book> findByNameStartingWith(String query) {
+        return bookRepository.findByNameStartingWith(query);
     }
 
     public Book getById(int id) throws BookDaoException {
@@ -80,6 +100,7 @@ public class BookService implements BookAdministration {
         Book bookFromDb = bookRepository.findById(book_id).orElseThrow(() -> new BookDaoException(DaoErrorCode.ENTITY_NOT_FOUND));
         Person personFromDb = personRepository.findById(person_id).orElseThrow(() -> new PersonDaoException(DaoErrorCode.ENTITY_NOT_FOUND));
         bookFromDb.setOwner(personFromDb);
+        bookFromDb.setDateOfIssue(new Date());
     }
 
 }
